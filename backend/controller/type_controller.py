@@ -49,10 +49,9 @@ def handle_post_type():
         return send_response(http_bad_request)
 
     type_obj = {
-        "user_id": body["user_id"],
-        "type_description": body["type_description"],
-        "type_name": body["type_name"],
-        "budget": body["budget"],
+        "user_id": body.get("user_id"),
+        "description": body.get("description"),
+        "budget": body.get("budget"),
     }
 
     result = add_type(type_obj)

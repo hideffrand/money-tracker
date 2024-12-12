@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 
 db = SQLAlchemy()
 
@@ -35,6 +36,7 @@ class Type(db.Model):
     user_id = db.Column('user_id', db.Integer(), db.ForeignKey('user.user_id'))
     description = db.Column('description', db.String(100), nullable=False)
     budget = db.Column('budget', db.Integer(), nullable=False)
+    checked = db.Column('checked', db.Boolean(), nullable=False, default=True)
 
     def __init__(self, user_id, description, budget):
         # self.type_id = type_id
@@ -47,7 +49,8 @@ class Type(db.Model):
             "type_id": self.type_id,
             "user_id": self.user_id,
             "description": self.description,
-            "budget": self.budget
+            "budget": self.budget,
+            "checked": self.checked
         }
 
 
@@ -61,14 +64,21 @@ class Transaction(db.Model):
     title = db.Column('title', db.String(100), nullable=False)
     description = db.Column('description', db.String(100), nullable=False)
     amount = db.Column('amount', db.Integer(), nullable=False)
+    datetime = db.Column('datetime', db.DateTime(timezone=True),
+                         nullable=False, server_default=func.now())
+    
+    # harusnya ini udh bener V
+    # created_at = db.Column(db.DateTime(timezone=True),
+    #                        server_default=func.now())
 
-    def __init__(self, type_id, user_id, description, amount, title):
+    def __init__(self, type_id, user_id, description, amount, title, datetime):
         # self.transaction_id = transaction_id
         self.type_id = type_id
         self.user_id = user_id
         self.title = title
         self.description = description
         self.amount = amount
+        self.datetime = datetime
 
     def to_json(self):
         return {
@@ -77,5 +87,6 @@ class Transaction(db.Model):
             "user_id": self.user_id,
             "title": self.title,
             "description": self.description,
-            "amount": self.amount
+            "amount": self.amount,
+            "datetime": self.datetime
         }

@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from service.transaction_service import *
 from helper.http_status_code import *
 from helper.response import send_response
+import datetime
 
 transactions = Blueprint("transactions", __name__)
 
@@ -27,6 +28,7 @@ def handle_create_new_transaction():
         "description": body.get("description"),
         "title": body.get("title"),
         "amount": body.get("amount"),
+        "datetime": datetime.datetime.now(),
     }
 
     res = add_transaction(transaction_obj)
@@ -64,3 +66,14 @@ def handle_delete_transaction(transaction_id):
         return send_response(http_internal_server_error)
 
     return send_response(http_ok, res)
+
+@transactions.route("/<int:transaction_id>/date", methods=["GET"])
+def handle_get_transaction_by_date(user_id):
+    res = get_transaction_filter(user_id)
+    if not res:
+        return send_response(http_internal_server_error)
+
+    return send_response(http_ok, res)
+
+
+    

@@ -16,12 +16,13 @@ load_dotenv()
 here = os.path.basename(__file__)
 app = Flask(__name__)
 # CORS(app)
-CORS(app, origins=["http://localhost:5173",
+CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
      "https://p9jctgvq-5173.asse.devtunnels.ms"], methods=["GET", "POST", "PUT", "PATCH"])
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:cbOiysfVpBZVvQUbHjhNsMyZZWXJaPvK@junction.proxy.rlwy.net:44512/railway'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:cbOiysfVpBZVvQUbHjhNsMyZZWXJaPvK@junction.proxy.rlwy.net:44512/railway'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.cxsnfjtvayxqgffdtife:NHMLf69iaXuC9zOg@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/money_tracker'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.secret_key = os.getenv('SECRET_KEY')

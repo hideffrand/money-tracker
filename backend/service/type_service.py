@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from model import *
 from helper.http_status_code import *
 from helper.logger import log
@@ -13,18 +14,26 @@ def get_types_by_user(user_id):
     if not data:
         return False
 
-    return [t.to_json() for t in data]
+    data = [d.to_json() for d in data]
+
+    for t_type in data:
+        total_used = db.session.query(func.sum(Transaction.amount))\
+                               .filter_by(user_id=user_id, type_id=t_type['type_id'])\
+                               .scalar() or 0
+
+        t_type['total_used'] = int(total_used)
+
+    return data
 
 
 def add_type(type_obj):
     if not type_obj:
         return False
     log(here,
-        f"adding type: {type_obj['type_name']} as type name with {type_obj['budget']} as budget")
+        f"adding type: {type_obj['description']} as type name with {type_obj['budget']} as budget")
 
     new_type = Type(user_id=type_obj["user_id"],
-                    type_description=type_obj["type_description"],
-                    type_name=type_obj["type_name"],
+                    description=type_obj["description"],
                     budget=type_obj["budget"])
 
     db.session.add(new_type)
