@@ -14,20 +14,17 @@ def get_transactions(user_id, start_date=None, end_date=None):
         return False
     types = [t.to_json() for t in types]
 
-    # Build the query for transactions
-    transaction_query = Transaction.query.filter_by(user_id=user_id)
 
-    # If start_date is provided, filter transactions after or on the start_date
+    transaction_query = Transaction.query.filter_by(user_id=user_id)
+    
     if start_date:
         transaction_query = transaction_query.filter(
-            Transaction.date >= start_date)
+            Transaction.datetime >= start_date)
 
-    # If end_date is provided, filter transactions before or on the end_date
     if end_date:
         transaction_query = transaction_query.filter(
-            Transaction.date <= end_date)
+            Transaction.datetime <= end_date)
 
-    # Execute the query to get the transactions
     transactions = transaction_query.all()
     if not transactions:
         return False

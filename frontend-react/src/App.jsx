@@ -78,13 +78,96 @@ function App() {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
   }
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleStartDateChange = (event) => {
+    setStartDate(event.target.value);
+  };
+
+  const handleEndDateChange = (event) => {
+    setEndDate(event.target.value);
+  };
+
+  const handleSubmitFilter = async (e) => {
+    e.preventDefault();
+    console.log("Filtering");
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/transactions/${userId}?start_date=${startDate}&end_date=${endDate}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data)
+        setTransactions(data);
+      } else {
+        alert("Failed to fetch transactions");
+      }
+    } catch (error) {
+      alert("An error occurred while fetching transactions");
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <Modal />
       <main className="h-full w-full p-4">
         <div className="w-full flex items-center justify-between py-2 px-2 bg-white shadow-md rounded-md mb-6">
           <div className="flex gap-8">
-            <div>Filter by Date</div>
+            <div>
+              <form onSubmit={handleSubmitFilter} className="flex items-end gap-2">
+                <div className="flex flex-col space-y-2">
+                  <label
+                    htmlFor="startDate"
+                    className="text-lg font-medium text-gray-600"
+                  >
+                    Start Date
+                  </label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={handleStartDateChange}
+                    className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <label
+                    htmlFor="endDate"
+                    className="text-lg font-medium text-gray-600"
+                  >
+                    End Date
+                  </label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                    className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="-translate-y-1 w-full p-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Filter Transactions
+                </button>
+              </form>
+            </div>
+          </div>
+          <div className="flex gap-16 items-center">
             <div className="flex gap-8 items-center justify-center">
               {types?.map((t, i) => (
                 <label
@@ -111,17 +194,17 @@ function App() {
                 + Add new
               </button>
             </div>
+            <button
+              onClick={() => {
+                deleteCookie("token");
+                deleteCookie("userId");
+                setUserId(null);
+              }}
+              className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Logout
+            </button>
           </div>
-          <button
-            onClick={() => {
-              deleteCookie("token");
-              deleteCookie("userId");
-              setUserId(null);
-            }}
-            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            Logout
-          </button>
         </div>
 
         <div className="flex gap-1 w-full h-full">
