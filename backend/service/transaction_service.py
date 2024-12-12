@@ -1,3 +1,4 @@
+from datetime import datetime
 from model import *
 from helper.http_status_code import *
 from helper.logger import log
@@ -7,13 +8,27 @@ import datetime
 here = os.path.basename(__file__)
 
 
-def get_transactions(user_id):
+def get_transactions(user_id, start_date=None, end_date=None):
     types = Type.query.filter_by(user_id=user_id).all()
     if not types:
         return False
     types = [t.to_json() for t in types]
 
-    transactions = Transaction.query.filter_by(user_id=user_id).all()
+    # Build the query for transactions
+    transaction_query = Transaction.query.filter_by(user_id=user_id)
+
+    # If start_date is provided, filter transactions after or on the start_date
+    if start_date:
+        transaction_query = transaction_query.filter(
+            Transaction.date >= start_date)
+
+    # If end_date is provided, filter transactions before or on the end_date
+    if end_date:
+        transaction_query = transaction_query.filter(
+            Transaction.date <= end_date)
+
+    # Execute the query to get the transactions
+    transactions = transaction_query.all()
     if not transactions:
         return False
     transactions = [transaction.to_json() for transaction in transactions]
@@ -25,7 +40,6 @@ def get_transactions(user_id):
     for transaction in transactions:
         result_obj[transaction["type_id"]].append(transaction)
 
-    # return transactions
     return result_obj
 
 
@@ -146,18 +160,19 @@ def generate_mock_transaction():
         db.session.add(transaction)
         db.session.commit()
 
+
 def get_transaction_filter(user_id):
     types = Type.query.filter_by(user_id=user_id).all()
     if not types:
         return False
     types = [t.to_json() for t in types]
 
-    transactions = Transaction.query.filter_by(user_id = user_id).order_by(Transaction.datetime.desc()).all()
+    transactions = Transaction.query.filter_by(
+        user_id=user_id).order_by(Transaction.datetime.desc()).all()
     if not transactions:
         return False
     transactions = [transaction.to_json() for transaction in transactions]
 
-    
     result_obj = {}
     for user_type in types:
         result_obj[user_type["type_id"]] = []
