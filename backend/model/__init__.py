@@ -82,7 +82,7 @@ class Transaction(db.Model):
 
     def to_json(self):
         return {
-            "transaction": self.transaction_id,
+            "transaction_id": self.transaction_id,
             "type_id": self.type_id,
             "user_id": self.user_id,
             "title": self.title,

@@ -12,13 +12,13 @@
         required
         hidden
       />
-      <!-- <input
-        v-model="name"
+      <input
         type="text"
         placeholder="Type name"
         class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        required
-      /> -->
+        value="get_type_name()"
+        readonly
+      />
       <input
         v-model="title"
         type="text"
@@ -88,6 +88,20 @@ export default {
       }
     },
   },
+
+  get_type_name() {
+    // Get the type name based on the selectedTypeId
+    try {
+      const res = fetch(`http://localhost:5000/types/get_type/${this.selectedTypeId}`);
+      if (!res.ok) throw new Error("Failed to fetch type name");
+
+      const data = res.json();
+      return data.data;
+    } catch (error) {
+      alert(error.message);
+    }
+  },
+
   created() {
     const cookies = document.cookie.split(";").reduce((acc, cookie) => {
       const [name, value] = cookie.trim().split("=");

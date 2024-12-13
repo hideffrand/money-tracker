@@ -14,9 +14,8 @@ def get_transactions(user_id, start_date=None, end_date=None):
         return False
     types = [t.to_json() for t in types]
 
-
     transaction_query = Transaction.query.filter_by(user_id=user_id)
-    
+
     if start_date:
         transaction_query = transaction_query.filter(
             Transaction.datetime >= start_date)
@@ -54,6 +53,9 @@ def add_transaction(object):
                                   )
     db.session.add(new_transaction)
     db.session.commit()
+
+    # type_name = Type.query.filter_by(type_id=object["type_id"]).first().description
+
     return True
 
 
@@ -61,8 +63,13 @@ def delete_transaction(transaction_id):
     if not transaction_id:
         return False
 
-    res = Transaction.query.filter_by(
-        transaction_id=transaction_id).delete()
+    transaction = Transaction.query.filter_by(
+        transaction_id=transaction_id).first()
+    if not transaction:
+        log(here, "Failed to delete transaction")
+        return False
+
+    db.session.delete(transaction)
     db.session.commit()
     return True
 

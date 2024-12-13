@@ -15,9 +15,11 @@ import os
 load_dotenv()
 here = os.path.basename(__file__)
 app = Flask(__name__)
-# CORS(app)
-CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
-     "https://p9jctgvq-5173.asse.devtunnels.ms"], methods=["GET", "POST", "PUT", "PATCH"])
+CORS(app,
+     origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
+              "https://p9jctgvq-5173.asse.devtunnels.ms"],
+     methods=["GET", "POST", "PUT", "PATCH", "DELETE"]
+     )
 
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:cbOiysfVpBZVvQUbHjhNsMyZZWXJaPvK@junction.proxy.rlwy.net:44512/railway'

@@ -26,6 +26,17 @@ def get_types_by_user(user_id):
     return data
 
 
+def get_type(type_id):
+    data = Type.query.filter_by(type_id=type_id).first()
+
+    if not data:
+        return False
+
+    print(data.description)
+
+    return data.description
+
+
 def add_type(type_obj):
     if not type_obj:
         return False

@@ -1,23 +1,49 @@
 <template>
   <div>
-    <!-- <div
-      class="w-full h-screen bg-[rgb(255,255,255,0.4)] flex items-center justify-center fixed top-0 left-0 z-50"
-    >
-      <div class="bg-gray-800 p-8 rounded-md">
-        <h2 class="text-xl text-white">Modal Content</h2>
-        <p class="text-white">You double-clicked a transaction!</p>
-        <button
-          @click="handleDoubleClick"
-          class="mt-4 text-white bg-red-500 rounded px-4 py-2"
-        >
-          Close Modal
-        </button>
-      </div>
-    </div> -->
+    <Modal />
     <main class="h-full w-full">
       <div
         class="w-full flex justify-between p-4 bg-white shadow-md rounded-md mb-6"
       >
+        <div>
+          <form
+            @submit.prevent="handleSubmitFilter"
+            class="flex items-end gap-2"
+          >
+            <div class="flex flex-col space-y-2">
+              <label for="startDate" class="text-lg font-medium text-gray-600">
+                Start Date
+              </label>
+              <input
+                id="startDate"
+                type="date"
+                v-model="startDate"
+                class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div class="flex flex-col space-y-2">
+              <label for="endDate" class="text-lg font-medium text-gray-600">
+                End Date
+              </label>
+              <input
+                id="endDate"
+                type="date"
+                v-model="endDate"
+                class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="-translate-y-1 w-full p-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Filter Transactions
+            </button>
+          </form>
+        </div>
         <div class="flex gap-8 items-center">
           <label
             v-for="(type, index) in types"
@@ -34,7 +60,7 @@
             />
             {{ type.description }}
           </label>
-          <button @click="">+ Add new</button>
+          <button @click="openAddNewTypeModal">+ Add new</button>
         </div>
         <div class="flex flex-col items-center justify-center">
           <div class="text-gray-600">
@@ -66,15 +92,15 @@
                 </h1>
                 <p>Budget: {{ toRupiah(type.budget) }}</p>
               </div>
-              <button @click="goToAddTransactionPage(type.type_id)">+</button>
+              <!-- <button @click="goToAddTransactionPage(type.type_id)">+</button> -->
+              <button @click="openAddTransactionModal(type.type_id)">+</button>
             </div>
             <div
               v-for="(transaction, j) in transactions[type.type_id] || []"
               :key="j"
               class="p-4 bg-gray-100 rounded-md shadow-sm"
-              @dblclick="handleDoubleClick"
-            > 
-            <!-- itu button yang add new blm ada logicnya ya? -->
+              @dblclick="openEditTransactionModal(transaction)"
+            >
               <h2 class="font-medium text-gray-700">{{ transaction.title }}</h2>
               <p class="text-gray-600">{{ toRupiah(transaction.amount) }}</p>
             </div>
@@ -90,38 +116,26 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { API_BASE_URL } from "../config";
 import Modal from "../components/Modal.vue";
+import { useModalStore } from "@/stores/modal";
 
 export default {
   components: {
     Modal,
   },
-  data() {
-    return {
-      modalOpen: false,
-    };
-  },
   methods: {
-    handleDoubleClick() {
-      this.modalOpen = !this.modalOpen;
-    },
     toRupiah(amount) {
       return "Rp " + amount.toLocaleString();
-    },
-    goToAddTransactionPage(type_id) {
-      this.$router.push({
-        path: "/add_transaction",
-        query: { type_id: type_id },
-      });
     },
   },
   setup() {
     const router = useRouter();
-    const modalOpen = ref(false);
     const userId = ref(null);
     const types = ref([]);
     const transactions = ref({});
+    const startDate = ref("");
+    const endDate = ref("");
+    const modalStore = useModalStore();
 
-    // Fetch types
     const getTypes = async () => {
       const res = await fetch(`${API_BASE_URL}/types/${userId.value}`);
       if (!res.ok) return;
@@ -141,7 +155,6 @@ export default {
       types.value = updatedTypes;
     };
 
-    // Fetch transactions
     const getTransactions = async () => {
       const res = await fetch(`${API_BASE_URL}/transactions/${userId.value}`);
       if (!res.ok) return;
@@ -150,7 +163,6 @@ export default {
       transactions.value = parsed.data || {};
     };
 
-    // Logout function
     const logout = () => {
       document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
       document.cookie =
@@ -159,22 +171,51 @@ export default {
       window.location.href = "/login";
     };
 
-    // Convert to Rupiah format
-    const toRupiah = (amount) => {
-      const number = parseInt(amount, 10);
-      if (isNaN(number)) return "Rp 0";
-      return `Rp${number.toLocaleString("id-ID")}`;
+    const openAddNewTypeModal = () => {
+      modalStore.content = "AddNewTypeModal";
+      modalStore.isOpen = true;
     };
 
-    // Open modal
-    // const openModal = () => {
-    //   toggleModal();
-    //   changeModalContent("AddNewTypeModal");
-    // };
+    const openAddTransactionModal = (typeId) => {
+      modalStore.selectedTypeId = typeId;
+      modalStore.content = "AddNewTransactionModal";
+      modalStore.isOpen = true;
+    };
 
-    // Handle mounting logic
+    const openEditTransactionModal = (transaction) => {
+      modalStore.selectedTransaction = transaction;
+      modalStore.content = "EditTransactionModal";
+      modalStore.isOpen = true;
+    };
+
+    const handleSubmitFilter = async (e) => {
+      e.preventDefault();
+      console.log("Filtering");
+
+      if (!startDate || !endDate) {
+        alert("Please select both start and end dates");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/transactions/${userId.value}?start_date=${startDate.value}&end_date=${endDate.value}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          transactions.value = data;
+        } else {
+          alert("Failed to fetch transactions");
+        }
+      } catch (error) {
+        alert("An error occurred while fetching transactions");
+        console.error(error);
+      }
+    };
+
     onMounted(() => {
-      // getTransactions();
       const cookies = document.cookie.split(";").reduce((acc, cookie) => {
         const [name, value] = cookie.trim().split("=");
         acc[name] = value;
@@ -189,13 +230,11 @@ export default {
       } else {
         userId.value = parseInt(userIdFromCookie);
       }
-      getTypes();
     });
 
-    // Watch for changes in userId to fetch data
     watch(userId, (newUserId) => {
       if (newUserId) {
-        // getTypes();
+        getTypes();
         getTransactions();
       }
     });
@@ -204,15 +243,20 @@ export default {
       userId,
       types,
       transactions,
+      startDate,
+      endDate,
       handleCheckboxChange,
       getTypes,
       getTransactions,
       logout,
+      openAddNewTypeModal,
+      openAddTransactionModal,
+      modalStore,
+      handleSubmitFilter,
+      openEditTransactionModal,
     };
   },
 };
 </script>
 
-<style scoped>
-/* Add your styles here */
-</style>
+<style scoped></style>

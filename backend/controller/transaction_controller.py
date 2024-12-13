@@ -59,20 +59,21 @@ def handle_create_new_transaction():
     return send_response(http_ok, res)
 
 
-@transactions.route("/", methods=["PUT"])
+@transactions.route("/update", methods=["POST"])
 def handle_update_transaction():
     body = request.get_json()
     if not body:
         return send_response(http_bad_request)
 
     transaction_obj = {
-        "transaction_id": body.get("transaction_id"),
+        "transaction_id": body.get("transaction_id"), # coba liat terminal cko none
         "type_id": body.get("type_id"),
         "description": body.get("description"),
         "title": body.get("title"),
         "amount": body.get("amount"),
         "user_id": body.get("user_id"),
     }
+    log(here, f'updating transaction {transaction_obj}')
     res = update_transaction(transaction_obj)
     if not res:
         return send_response(http_internal_server_error)

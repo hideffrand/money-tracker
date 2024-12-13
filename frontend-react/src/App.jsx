@@ -105,7 +105,7 @@ function App() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         setTransactions(data);
       } else {
         alert("Failed to fetch transactions");
@@ -123,7 +123,10 @@ function App() {
         <div className="w-full flex items-center justify-between py-2 px-2 bg-white shadow-md rounded-md mb-6">
           <div className="flex gap-8">
             <div>
-              <form onSubmit={handleSubmitFilter} className="flex items-end gap-2">
+              <form
+                onSubmit={handleSubmitFilter}
+                className="flex items-end gap-2"
+              >
                 <div className="flex flex-col space-y-2">
                   <label
                     htmlFor="startDate"

@@ -60,3 +60,11 @@ def handle_post_type():
         return send_response(http_bad_request)
 
     return send_response(http_ok)
+
+@types.route("get_type/<int:type_id>", methods=["GET"])
+def handle_get_type(type_id):
+    data = get_type(type_id)
+    if not data:
+        return send_response(http_not_found)
+
+    return send_response(http_ok, data)
