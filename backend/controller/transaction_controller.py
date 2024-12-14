@@ -49,7 +49,7 @@ def handle_create_new_transaction():
         "description": body.get("description"),
         "title": body.get("title"),
         "amount": body.get("amount"),
-        "datetime": datetime.datetime.now(),
+        "datetime": datetime.now(),
     }
 
     res = add_transaction(transaction_obj)
